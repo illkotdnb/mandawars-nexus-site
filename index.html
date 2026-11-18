@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MandaWars Nexus — настольная война четырёх</title>
+<meta name="description" content="MandaWars Nexus: настольная война четырёх на крестовом поле. Офлайн с ботами, вчетвером на одном телефоне и онлайн с голосовым чатом.">
+<meta property="og:title" content="MandaWars Nexus">
+<meta property="og:description" content="Настольная война четырёх на крестовом поле. Офлайн, вчетвером на одном телефоне и онлайн.">
+<meta property="og:image" content="assets/menu.webp">
+<meta name="theme-color" content="#07070c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07070c;
+    --bg-2: #0d0d16;
+    --ink: #f2f4f7;
+    --muted: #9aa0b4;
+    --line: rgba(255,255,255,.09);
+    --red: #e53935;
+    --purple: #a55ae2;
+    --blue: #326bde;
+    --white: #f2f4f7;
+    --gold: #f5b82e;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  .wrap { width: min(1080px, 100% - 40px); margin: 0 auto; }
+  h1, h2, h3 { font-family: "Unbounded", "Inter", sans-serif; line-height: 1.15; margin: 0; }
+  h2 { font-size: clamp(24px, 3.4vw, 36px); font-weight: 800; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .18em; font-size: 12px; color: var(--gold); font-weight: 600; margin: 0 0 12px; }
+  .lead { color: var(--muted); font-size: clamp(16px, 1.6vw, 18px); max-width: 60ch; margin: 14px 0 0; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(10px);
+    background: rgba(7,7,12,.7);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 58px; gap: 16px; }
+  .brand { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 15px; text-decoration: none; letter-spacing: .02em; }
+  .brand span { color: var(--gold); }
+  nav a { color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 22px; }
+  nav a:hover { color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    min-height: min(92vh, 860px);
+    display: grid; place-items: center;
+    overflow: hidden;
+    text-align: center;
+    padding: 80px 0 60px;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: url("assets/menu.webp") center 30% / cover no-repeat;
+    opacity: .55;
+    filter: saturate(1.1);
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, transparent 0%, rgba(7,7,12,.85) 75%),
+      linear-gradient(to bottom, rgba(7,7,12,.2), var(--bg) 96%);
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero .logo { width: min(640px, 92%); margin: 0 auto; filter: drop-shadow(0 10px 40px rgba(165,90,226,.35)); }
+  .hero .tagline { font-size: clamp(17px, 2vw, 21px); color: #d7dbe8; max-width: 36ch; margin: 26px auto 0; }
+  .hero .meta { color: var(--muted); font-size: 13px; margin-top: 10px; letter-spacing: .04em; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+  .btn {
+    display: inline-block; text-decoration: none; font-weight: 600; font-size: 15px;
+    padding: 14px 24px; border-radius: 999px; border: 1px solid var(--line);
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--gold), #ff8a3d);
+    color: #120c02; border-color: transparent;
+    box-shadow: 0 10px 30px rgba(245,184,46,.25);
+  }
+  .btn-ghost { background: rgba(255,255,255,.04); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,.09); }
+
+  /* ---------- sections ---------- */
+  section { padding: 96px 0; position: relative; }
+  section + section { border-top: 1px solid var(--line); }
+  .head { max-width: 680px; margin-bottom: 44px; }
+
+  /* ---------- factions ---------- */
+  .factions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .faction {
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px 18px 20px; position: relative; overflow: hidden;
+  }
+  .faction::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+    background: var(--c);
+    box-shadow: 0 0 22px var(--c);
+  }
+  .faction::after {
+    content: ""; position: absolute; width: 180px; height: 180px; right: -70px; top: -70px;
+    background: radial-gradient(circle, var(--c) 0%, transparent 70%); opacity: .18;
+  }
+  .faction img { width: 84px; height: 84px; border-radius: 50%; border: 2px solid var(--c); padding: 3px; background: #000; margin-bottom: 16px; }
+  .faction .side { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--c); font-weight: 600; }
+  .faction h3 { font-size: 17px; margin: 6px 0 10px; font-weight: 800; }
+  .faction p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .faction q { display: block; margin-top: 14px; font-style: italic; color: #c9cde0; font-size: 14px; quotes: "«" "»"; }
+  .f-red { --c: var(--red); }
+  .f-purple { --c: var(--purple); }
+  .f-blue { --c: var(--blue); }
+  .f-white { --c: var(--white); }
+
+  /* ---------- steps ---------- */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+  .step {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 24px;
+    background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+  }
+  .step .n {
+    font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 13px; color: var(--gold);
+    width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+    border: 1px solid rgba(245,184,46,.5); margin-bottom: 16px;
+  }
+  .step h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  /* ---------- modes ---------- */
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .mode {
+    border-radius: var(--radius); padding: 28px; border: 1px solid var(--line); background: var(--bg-2);
+  }
+  .mode .tag { font-size: 12px; color: var(--gold); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+  .mode h3 { font-size: 20px; font-weight: 800; margin: 10px 0 8px; }
+  .mode p { margin: 0; color: var(--muted); }
+  .mode ul { margin: 14px 0 0; padding-left: 18px; color: #c9cde0; font-size: 15px; }
+  .mode li { margin: 4px 0; }
+
+  /* ---------- gallery ---------- */
+  .gallery { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start; }
+  .shot {
+    border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line);
+    background: #000; margin: 0;
+  }
+  .shot img { width: 100%; height: auto; }
+  .shot figcaption { padding: 12px 16px; color: var(--muted); font-size: 14px; background: var(--bg-2); }
+  .gallery .phone { max-width: 320px; margin: 0 auto; }
+
+  /* ---------- rules strip ---------- */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .rules .pic { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+  .rules ul { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 14px; }
+  .rules li { padding-left: 26px; position: relative; color: #d7dbe8; }
+  .rules li::before {
+    content: ""; position: absolute; left: 0; top: .55em; width: 10px; height: 10px; border-radius: 3px;
+    background: linear-gradient(135deg, var(--gold), var(--red));
+  }
+  .rules li b { color: var(--ink); }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); padding: 44px 0 56px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+  footer a { color: var(--ink); }
+
+  /* ---------- reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 920px) {
+    .factions { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: 1fr; }
+    .modes { grid-template-columns: 1fr; }
+    .gallery, .rules { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    section { padding: 72px 0; }
+    nav a:not(.keep) { display: none; }
+    .factions { grid-template-columns: 1fr; }
+    .btn { width: 100%; text-align: center; }
+    .cta { flex-direction: column; align-items: stretch; }
+    .wrap { width: calc(100% - 32px); }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">MandaWars <span>Nexus</span></a>
+    <nav>
+      <a href="#factions">Фракции</a>
+      <a href="#rules">Правила</a>
+      <a href="#modes">Режимы</a>
+      <a class="keep" href="https://mandawars.ru">Играть</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <div class="hero">
+    <div class="wrap">
+      <img class="logo" src="assets/logo.webp" alt="MandaWars Nexus">
+      <p class="tagline">Настольная война четырёх на крестовом поле. Четыре цивилизации, которые помнят разные версии одной истории.</p>
+      <p class="meta">Версия 1.2.6 · офлайн · онлайн · голосовой чат</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://mandawars.ru">Играть в браузере</a>
+        <a class="btn btn-ghost" href="#rules">Как играть</a>
+        <a class="btn btn-ghost" href="https://github.com/illkotdnb/mandawars-nexus">Исходный код</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="factions">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Четыре стороны креста</p>
+        <h2>Четыре фракции — по пять фишек у каждой</h2>
+        <p class="lead">Каждая сторона поля — своя цивилизация со своим цветом и девизом. Их объединяет секта «Зачёркнутые», которая проникла во все четыре.</p>
+      </div>
+      <div class="factions">
+        <article class="faction f-red reveal">
+          <img src="assets/crossed.webp" alt="Зачёркнутые" width="84" height="84">
+          <div class="side">Слева · красные</div>
+          <h3>Зачёркнутые</h3>
+          <p>Секта, которая проникла во все четыре цивилизации и тянет нити между ними.</p>
+          <q>Правда не обязана быть одной</q>
+        </article>
+        <article class="faction f-purple reveal">
+          <img src="assets/amate.webp" alt="Аматэ" width="84" height="84">
+          <div class="side">Сверху · фиолетовые</div>
+          <h3>Аматэ</h3>
+          <p>Цивилизация чести и дисциплины. Металлический цветок — её знак.</p>
+          <q>Честь сильнее приказа</q>
+        </article>
+        <article class="faction f-blue reveal">
+          <img src="assets/syntex.webp" alt="Синтекс" width="84" height="84">
+          <div class="side">Справа · синие</div>
+          <h3>Синтекс</h3>
+          <p>Мир, где реальность поддаётся настройке. Энергоканалы и массивный броне-герб.</p>
+          <q>Реальность поддаётся настройке</q>
+        </article>
+        <article class="faction f-white reveal">
+          <img src="assets/afterlife.webp" alt="Посмертие" width="84" height="84">
+          <div class="side">Снизу · белые</div>
+          <h3>Посмертие</h3>
+          <p>Те, кто помнит всё. Призрачный лик с нимбом и тихая память о прошлом.</p>
+          <q>Смерть не стирает память</q>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="rules">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Правила</p>
+        <h2>Крест, кубики и выход на старт</h2>
+        <p class="lead">Классика остаётся классикой. Дополнительные правила включаются в настройках — по выбору игроков.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="n">1</div>
+          <h3>Выход на старт</h3>
+          <p>Фишки стоят на базах. Шестёрка выводит фишку на старт, дальше она идёт по кругу поля к своему дому.</p>
+        </div>
+        <div class="step reveal">
+          <div class="n">2</div>
+          <h3>Срубить и выкупить</h3>
+          <p>Фишка на чужой клетке отправляется в плен. Шестёрка выкупает своих пленных и возвращает их в игру.</p>
+        </div>
+        <div class="step reveal">
+          <div class="n">3</div>
+          <h3>Дойти до дома</h3>
+          <p>Побеждает тот, кто первым приведёт все свои фишки в дом. Даже если фишек меньше пяти — они всё равно доходят до конца.</p>
+        </div>
+      </div>
+
+      <div class="rules" style="margin-top:56px">
+        <figure class="pic reveal" style="margin:0">
+          <img src="assets/board.webp" alt="Схема поля MandaWars Nexus" width="760" height="760" loading="lazy">
+        </figure>
+        <div class="reveal">
+          <p class="eyebrow">Ход партии</p>
+          <h3 style="font-size:22px">Кубики решают, но выбираешь ты</h3>
+          <ul>
+            <li><b>Бросок</b> — два кубика. Выбираешь, какой фишкой ходить.</li>
+            <li><b>Срубание</b> — если на клетке чужая фишка, её можно срубить.</li>
+            <li><b>Своя раса</b> — кнопка «Бросить» и подсветка фишек в цвете вашей фракции.</li>
+            <li><b>Правила</b> — дополнительные настройки включаются во вкладке «Правила».</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modes">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Как играть</p>
+        <h2>Один телефон, компьютер или онлайн</h2>
+        <p class="lead">Играйте с ботами, вчетвером за одним экраном или с друзьями по коду комнаты.</p>
+      </div>
+      <div class="modes">
+        <div class="mode reveal">
+          <div class="tag">Офлайн</div>
+          <h3>Против ботов</h3>
+          <p>Партия с компьютером на одном устройстве. Можно тренироваться перед онлайном.</p>
+          <ul>
+            <li>Настраиваемые правила</li>
+            <li>Герои и их способности</li>
+          </ul>
+        </div>
+        <div class="mode reveal">
+          <div class="tag">На одном телефоне</div>
+          <h3>Вчетвером</h3>
+          <p>Передавайте телефон по кругу. Каждый видит свою сторону поля и свой цвет.</p>
+          <ul>
+            <li>Не нужен интернет</li>
+            <li>Каждый видит свою сторону поля</li>
+          </ul>
+        </div>
+        <div class="mode reveal">
+          <div class="tag">Онлайн</div>
+          <h3>По коду комнаты</h3>
+          <p>Создайте комнату и отправьте код друзьям. Каждый играет со своего устройства.</p>
+          <ul>
+            <li>Игра в браузере и в Android-приложении</li>
+            <li>Игра с iPhone через браузер</li>
+          </ul>
+        </div>
+        <div class="mode reveal">
+          <div class="tag">Голосом</div>
+          <h3>Голосовой чат</h3>
+          <p>Общайтесь во время партии прямо в приложении и в браузере.</p>
+          <ul>
+            <li>Работает в онлайн-комнате</li>
+            <li>Музыка приглушается, пока кто-то говорит</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Экраны</p>
+        <h2>Поле, панель и ход</h2>
+        <p class="lead">Так игра выглядит в браузере. Вид «Nexus» — новое оформление, которое ещё на проверке.</p>
+      </div>
+      <div class="gallery">
+        <figure class="shot reveal">
+          <img src="assets/desk.webp" alt="Партия на большом экране: поле и панель хода" width="1280" height="860">
+          <figcaption>Партия на компьютере: поле, кубики и журнал ходов.</figcaption>
+        </figure>
+        <figure class="shot phone reveal">
+          <img src="assets/phone.webp" alt="Партия на телефоне" width="390" height="967">
+          <figcaption>Так же на телефоне.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="eyebrow">Версия 1.2.6</p>
+        <h2>Игра развивается</h2>
+        <p class="lead">Правила проверяются 113 автотестами. Новые возможности проходят проверку на телефонах и в браузере, прежде чем попасть в сборку.</p>
+      </div>
+      <div class="cta" style="justify-content:flex-start">
+        <a class="btn btn-primary" href="https://mandawars.ru">Открыть игру</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MandaWars Nexus · 1.2.6</span>
+    <span><a href="https://mandawars.ru">mandawars.ru</a> · <a href="https://github.com/illkotdnb/mandawars-nexus">GitHub</a></span>
+  </div>
+</footer>
+
+<script>
+  // Появление блоков при прокрутке. Без JS все блоки видны.
+  (function () {
+    var items = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { items.forEach(function (el) { el.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    items.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>
